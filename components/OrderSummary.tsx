@@ -1,0 +1,91 @@
+
+import React from 'react';
+import type { OrderItemType } from '../types';
+import Icon from './Icon';
+
+interface OrderSummaryProps {
+  isOpen: boolean;
+  onClose: () => void;
+  orderItems: OrderItemType[];
+  onUpdateQuantity: (itemId: number, newQuantity: number) => void;
+}
+
+const formatPrice = (price: number) => {
+  return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
+const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems, onUpdateQuantity }) => {
+  if (!isOpen) return null;
+
+  const totalPrice = orderItems.reduce((total, orderItem) => {
+    return total + orderItem.item.price * orderItem.quantity;
+  }, 0);
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4 transition-opacity duration-300"
+      onClick={onClose}
+      aria-modal="true"
+      role="dialog"
+    >
+      <div 
+        className="bg-gray-800 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-gray-700 transform transition-transform duration-300 scale-95"
+        style={{ animation: 'scale-up 0.3s forwards' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <style>{`
+          @keyframes scale-up {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+          }
+        `}</style>
+        <header className="flex items-center justify-between p-4 border-b border-gray-700 flex-shrink-0">
+          <h2 className="text-2xl font-bold text-white">Resumo do Pedido</h2>
+          <button onClick={onClose} aria-label="Fechar resumo do pedido" className="p-2 rounded-full hover:bg-gray-700 transition-colors">
+            <Icon name="close" className="w-6 h-6 text-gray-400" />
+          </button>
+        </header>
+
+        <main className="p-6 overflow-y-auto space-y-4">
+          {orderItems.length === 0 ? (
+            <p className="text-gray-400 text-center py-8">Seu carrinho está vazio.</p>
+          ) : (
+            orderItems.map(({ item, quantity }) => (
+              <div key={item.id} className="flex items-center space-x-4">
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.name} 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-white truncate">{item.name}</h3>
+                  <p className="text-sm text-orange-400">{formatPrice(item.price)}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button onClick={() => onUpdateQuantity(item.id, quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-gray-700 hover:bg-orange-600 transition-colors">-</button>
+                  <span className="w-8 text-center font-bold">{quantity}</span>
+                  <button onClick={() => onUpdateQuantity(item.id, quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-gray-700 hover:bg-orange-600 transition-colors">+</button>
+                </div>
+                <p className="w-20 text-right font-bold">{formatPrice(item.price * quantity)}</p>
+              </div>
+            ))
+          )}
+        </main>
+
+        <footer className="p-6 mt-auto border-t border-gray-700 space-y-4 flex-shrink-0">
+            <div className="flex justify-between text-xl font-bold">
+                <span>Total</span>
+                <span>{formatPrice(totalPrice)}</span>
+            </div>
+            <button disabled={orderItems.length === 0} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+                Finalizar Pedido
+            </button>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default OrderSummary;
