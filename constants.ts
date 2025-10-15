@@ -78,10 +78,10 @@ export const MENU_DATA: MenuCategoryType[] = [
         },
         {
             id: 302,
-            name: 'Cupcake Chocolate [4 un.]',
-            description: 'O clássico cacau em versão sem açúcar. Macios, saborosos e pensados para matar a vontade de doce sem culpa.',
+            name: 'Cupcake Prestígio [4 un.]',
+            description: 'O clássico cacau + coco em versão sem açúcar. Macios, saborosos e pensados para matar a vontade de doce sem culpa.',
             price: 24,
-            imageUrl: 'https://i.imgur.com/MoyDbjW.png',
+            imageUrl: 'https://i.imgur.com/gTF5TB5.png',
         },
         {
             id: 303,
@@ -118,24 +118,11 @@ export const MENU_DATA: MenuCategoryType[] = [
             imageUrl: 'https://i.imgur.com/nXzXeTy.jpeg',
         },
         {
-            id: 404,
+            id: 405,
             name: 'Açaí',
             description: 'Cremoso e cheio de energia: açaí batido com banana, naturalmente doce e refrescante.',
             price: 8,
             imageUrl: 'https://i.imgur.com/y7ZRu3C.jpeg',
-      },
-    ],
-  },
-  {
-    id: 5,
-    name: 'Festa',
-    items: [
-        {
-            id: 501,
-            name: 'Lanches para festa',
-            description: 'Bolo de chocolate fofinho e delicioso, perfeito para festas. Consulte opções de tamanho e cobertura.',
-            price: 'A combinar',
-            imageUrl: 'https://i.imgur.com/I37Jdk1.png',
         },
     ]
   }
