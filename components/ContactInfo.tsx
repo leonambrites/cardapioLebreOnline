@@ -4,7 +4,7 @@ import Icon from './Icon';
 
 const ContactInfo: React.FC = () => {
   const infoItems = [
-    { icon: 'location', text: 'Entregas em Vargens, Barra e Recreio' },
+    { icon: 'location', text: 'Entregas congeladas em Vargens, Barra e Recreio (Em até 48h)' },
     { icon: 'phone', text: '(21) 98211-2061' },
   ];
 
