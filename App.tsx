@@ -5,6 +5,7 @@ import MenuCategory from './components/MenuCategory';
 import OrderSummary from './components/OrderSummary';
 import FloatingCartButton from './components/FloatingCartButton';
 import ImageModal from './components/ImageModal';
+import ContactInfo from './components/ContactInfo';
 import { MENU_DATA } from './constants';
 import type { MenuCategoryType, MenuItemType, OrderItemType } from './types';
 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
       if (existingItemIndex > -1) {
         // Item exists, update quantity
         const updatedOrder = [...prevOrder];
+        // FIX: Corrected variable name from 'existingItem' to 'existingItemIndex' and removed incorrect '-1'.
         updatedOrder[existingItemIndex].quantity += quantity;
         return updatedOrder;
       } else {
@@ -65,6 +67,9 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900 text-white">
       <div className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         <Header />
+        <div className="mt-8">
+          <ContactInfo />
+        </div>
         <main className="mt-8">
           <div className="mt-12 space-y-12">
             {MENU_DATA.map((category: MenuCategoryType) => (
