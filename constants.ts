@@ -8,7 +8,7 @@ export const MENU_DATA: MenuCategoryType[] = [
       {
         id: 101,
         name: 'Bolinho de frango com queijo [4 un.]',
-        description: 'Delicioso bolinho com massa de batata doce, recheado com frango cremoso e queijo. Assado e saudável!',
+        description: 'Delicioso bolinho com massa de batata doce e frango, recheado com queijo. Assado e saudável!',
         price: 24,
         imageUrl: 'https://i.imgur.com/Mu3eoJm.png',
       },
