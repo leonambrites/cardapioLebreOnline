@@ -15,16 +15,16 @@ export const MENU_DATA: MenuCategoryType[] = [
       {
         id: 103,
         name: 'Quibe de forno [4 un.]',
-        description: 'Quibe de carne assado no forno, temperado suavemente com hortelã para agradar o paladar dos pequenos.',
+        description: 'Quibe assado no forno, temperado suavemente com hortelã.',
         price: 24,
         imageUrl: 'https://i.imgur.com/h9pIMPY.png',
       },
       {
         id: 104,
         name: 'Nuggets caseiros [8 un.]',
-        description: 'Nuggets de frango feitos em casa, crocantes por fora e macios por dentro. Assados na airfryer, sem industrializados.',
+        description: 'Nuggets de frango feitos em casa. Assados na airfryer, sem industrializados.',
         price: 24,
-        imageUrl: 'https://picsum.photos/seed/nuggets-caseiros/400/300',
+        imageUrl: 'https://i.imgur.com/HfyYCwn.png',
       },
       {
         id: 105,
