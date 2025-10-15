@@ -9,8 +9,8 @@ const ContactInfo: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: 'whatsapp', href: '#', label: 'WhatsApp' },
-    { icon: 'instagram', href: '#', label: 'Instagram' },
+    { icon: 'whatsapp', href: 'https://wa.me/5521982112061?text=Ol%C3%A1%21%20Gostaria%20de%20informa%C3%A7%C3%B5es', label: 'WhatsApp' },
+    { icon: 'instagram', href: 'https://www.instagram.com/lebre.alimentos/', label: 'Instagram' },
   ];
 
   return (
