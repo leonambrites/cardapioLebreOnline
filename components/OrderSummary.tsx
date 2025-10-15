@@ -2,6 +2,7 @@
 import React from 'react';
 import type { OrderItemType } from '../types';
 import Icon from './Icon';
+import { CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
 
 interface OrderSummaryProps {
   isOpen: boolean;
@@ -20,6 +21,23 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
   const totalPrice = orderItems.reduce((total, orderItem) => {
     return total + orderItem.item.price * orderItem.quantity;
   }, 0);
+
+  const handleFinalizeOrder = () => {
+    if (orderItems.length === 0) return;
+
+    let message = 'Olá! Gostaria de fazer o seguinte pedido:\n\n';
+    
+    orderItems.forEach(({ item, quantity }) => {
+      message += `- ${quantity}x ${item.name}\n`;
+    });
+
+    message += `\n*Total: ${formatPrice(totalPrice)}*`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${CONTACT_PHONE_NUMBER_WHATSAPP}?text=${encodedMessage}`;
+
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <div 
@@ -79,8 +97,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
                 <span>Total</span>
                 <span>{formatPrice(totalPrice)}</span>
             </div>
-            <button disabled={orderItems.length === 0} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
-                Finalizar Pedido
+            <button 
+              onClick={handleFinalizeOrder}
+              disabled={orderItems.length === 0} 
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+                <Icon name="whatsapp" className="w-5 h-5" />
+                <span>Finalizar via WhatsApp</span>
             </button>
         </footer>
       </div>
