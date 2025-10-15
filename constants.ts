@@ -21,7 +21,7 @@ export const MENU_DATA: MenuCategoryType[] = [
       },
       {
         id: 104,
-        name: 'Nuggets caseiros [8 un.]',
+        name: 'Nuggets caseiros [7 un.]',
         description: 'Nuggets de frango feitos em casa. Assados na airfryer, sem industrializados.',
         price: 24,
         imageUrl: 'https://i.imgur.com/HfyYCwn.png',
@@ -31,7 +31,7 @@ export const MENU_DATA: MenuCategoryType[] = [
         name: 'Molho de tomate caseiro [200g]',
         description: 'Ingredientes: tomates, manjericão, cebola roxa, cenoura, beterraba, pimentão vermelho, alho, azeite e sal.',
         price: 13,
-        imageUrl: 'https://picsum.photos/seed/molho-tomate/400/300',
+        imageUrl: 'https://i.imgur.com/B6mo5yF.png',
       },
     ],
   },
