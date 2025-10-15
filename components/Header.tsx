@@ -1,7 +1,32 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Header: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const checkStatus = () => {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const hour = now.getHours();
+
+      // Dias úteis (Segunda a Sexta)
+      const isWeekday = day >= 1 && day <= 5;
+      // Horário comercial (9h até 18h)
+      const isWithinHours = hour >= 9 && hour < 18;
+
+      setIsOpen(isWeekday && isWithinHours);
+    };
+
+    // Verifica o status ao carregar o componente
+    checkStatus();
+
+    // Continua verificando a cada minuto
+    const intervalId = setInterval(checkStatus, 60000);
+
+    // Limpa o intervalo quando o componente é desmontado
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <header className="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-800/50 rounded-2xl shadow-lg backdrop-blur-sm border border-gray-700">
       <div className="flex items-center space-x-4">
@@ -17,12 +42,18 @@ const Header: React.FC = () => {
           <p className="text-orange-400 font-semibold">Delícias saudáveis para todas as idades</p>
         </div>
       </div>
-      <div className="mt-4 sm:mt-0 flex items-center space-x-2 bg-green-500/20 text-green-300 border border-green-400 rounded-full px-4 py-1.5 text-sm font-semibold">
+      <div className={`mt-4 sm:mt-0 flex items-center space-x-2 rounded-full px-4 py-1.5 text-sm font-semibold border ${
+          isOpen
+            ? 'bg-green-500/20 text-green-300 border-green-400'
+            : 'bg-red-500/20 text-red-300 border-red-400'
+        }`}>
         <span className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          {isOpen && (
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          )}
+          <span className={`relative inline-flex rounded-full h-3 w-3 ${isOpen ? 'bg-green-500' : 'bg-red-500'}`}></span>
         </span>
-        <span>Aberto</span>
+        <span>{isOpen ? 'Aberto' : 'Fechado'}</span>
       </div>
     </header>
   );
