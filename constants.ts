@@ -1,5 +1,8 @@
 import type { MenuCategoryType } from './types';
 
+export const CONTACT_PHONE_NUMBER = '(21) 98211-2061';
+export const CONTACT_PHONE_NUMBER_WHATSAPP = '5521982112061'; // Formato internacional: Código do país + DDD + Número
+
 export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 1,
