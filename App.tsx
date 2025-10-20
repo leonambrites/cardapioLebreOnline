@@ -59,6 +59,10 @@ const App: React.FC = () => {
     setImageModal({ isOpen: false, imageUrl: '' });
   };
 
+  const handleClearCart = () => {
+    setOrder([]);
+  };
+
   const totalItemsInCart = useMemo(() => {
     return order.reduce((total, currentItem) => total + currentItem.quantity, 0);
   }, [order]);
@@ -97,6 +101,7 @@ const App: React.FC = () => {
         onClose={() => setOrderSummaryOpen(false)}
         orderItems={order}
         onUpdateQuantity={handleUpdateQuantity}
+        onClearCart={handleClearCart}
       />
 
       <ImageModal

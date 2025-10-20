@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import type { MenuItemType } from '../types';
 import Icon from './Icon';
+import { CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
 
 interface MenuItemProps {
   item: MenuItemType;
@@ -12,6 +13,8 @@ interface MenuItemProps {
 const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToOrder, onImageClick }) => {
   const [quantity, setQuantity] = useState(1);
   const [wasAdded, setWasAdded] = useState(false);
+
+  const isPriceNumber = typeof item.price === 'number';
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('pt-BR', {
@@ -37,6 +40,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToOrder, onImageClick })
     }, 1500);
   };
 
+  const handleConsult = () => {
+    const message = `Olá! Gostaria de mais informações sobre o item: ${item.name}.`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${CONTACT_PHONE_NUMBER_WHATSAPP}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <div className="flex bg-gray-800/60 rounded-2xl overflow-hidden shadow-lg border border-gray-700 transition-all duration-300 hover:shadow-orange-500/20 hover:border-orange-500/50 hover:scale-[1.02]">
       <div 
@@ -58,41 +68,53 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToOrder, onImageClick })
         <div className="mt-4 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-xl sm:text-2xl font-bold text-orange-400">
-              {formatPrice(item.price)}
+              {isPriceNumber ? formatPrice(item.price as number) : item.price}
             </p>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleDecrement}
-                aria-label="Diminuir quantidade"
-                disabled={quantity <= 1}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-white text-2xl font-bold transition-colors hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                -
-              </button>
-              <span className="w-8 text-center text-lg font-bold" aria-live="polite">
-                {quantity}
-              </span>
-              <button
-                onClick={handleIncrement}
-                aria-label="Aumentar quantidade"
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-white text-2xl font-bold transition-colors hover:bg-orange-600"
-              >
-                +
-              </button>
-            </div>
+            {isPriceNumber && (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleDecrement}
+                  aria-label="Diminuir quantidade"
+                  disabled={quantity <= 1}
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-white text-2xl font-bold transition-colors hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  -
+                </button>
+                <span className="w-8 text-center text-lg font-bold" aria-live="polite">
+                  {quantity}
+                </span>
+                <button
+                  onClick={handleIncrement}
+                  aria-label="Aumentar quantidade"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-white text-2xl font-bold transition-colors hover:bg-orange-600"
+                >
+                  +
+                </button>
+              </div>
+            )}
           </div>
-          <button
-            onClick={handleAddToCartClick}
-            disabled={wasAdded}
-            className={`w-full flex items-center justify-center text-sm font-bold py-2.5 px-4 rounded-lg transition-all duration-300 ${
-              wasAdded 
-                ? 'bg-green-600 text-white cursor-not-allowed' 
-                : 'bg-orange-600 hover:bg-orange-700 text-white'
-            }`}
-          >
-            <Icon name={wasAdded ? 'check' : 'cart'} className="w-5 h-5 mr-2" />
-            {wasAdded ? 'Adicionado!' : 'Adicionar ao Pedido'}
-          </button>
+          {isPriceNumber ? (
+            <button
+              onClick={handleAddToCartClick}
+              disabled={wasAdded}
+              className={`w-full flex items-center justify-center text-sm font-bold py-2.5 px-4 rounded-lg transition-all duration-300 ${
+                wasAdded 
+                  ? 'bg-green-600 text-white cursor-not-allowed' 
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'
+              }`}
+            >
+              <Icon name={wasAdded ? 'check' : 'cart'} className="w-5 h-5 mr-2" />
+              {wasAdded ? 'Adicionado!' : 'Adicionar ao Pedido'}
+            </button>
+          ) : (
+            <button
+              onClick={handleConsult}
+              className="w-full flex items-center justify-center text-sm font-bold py-2.5 px-4 rounded-lg transition-all duration-300 bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Icon name="whatsapp" className="w-5 h-5 mr-2" />
+              Consultar
+            </button>
+          )}
         </div>
       </div>
     </div>

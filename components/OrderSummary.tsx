@@ -9,17 +9,22 @@ interface OrderSummaryProps {
   onClose: () => void;
   orderItems: OrderItemType[];
   onUpdateQuantity: (itemId: number, newQuantity: number) => void;
+  onClearCart: () => void;
 }
 
 const formatPrice = (price: number) => {
   return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems, onUpdateQuantity }) => {
+const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems, onUpdateQuantity, onClearCart }) => {
   if (!isOpen) return null;
 
+  // FIX: The price can be a string (e.g., "A combinar"), so only add to total if it's a number.
   const totalPrice = orderItems.reduce((total, orderItem) => {
-    return total + orderItem.item.price * orderItem.quantity;
+    if (typeof orderItem.item.price === 'number') {
+      return total + orderItem.item.price * orderItem.quantity;
+    }
+    return total;
   }, 0);
 
   const handleFinalizeOrder = () => {
@@ -79,14 +84,16 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-white truncate">{item.name}</h3>
-                  <p className="text-sm text-orange-400">{formatPrice(item.price)}</p>
+                  {/* FIX: Check if price is a number before formatting, otherwise display as string. */}
+                  <p className="text-sm text-orange-400">{typeof item.price === 'number' ? formatPrice(item.price) : item.price}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button onClick={() => onUpdateQuantity(item.id, quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-gray-700 hover:bg-orange-600 transition-colors">-</button>
                   <span className="w-8 text-center font-bold">{quantity}</span>
                   <button onClick={() => onUpdateQuantity(item.id, quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-gray-700 hover:bg-orange-600 transition-colors">+</button>
                 </div>
-                <p className="w-20 text-right font-bold">{formatPrice(item.price * quantity)}</p>
+                {/* FIX: Check if price is a number before performing arithmetic operation. */}
+                <p className="w-20 text-right font-bold">{typeof item.price === 'number' ? formatPrice(item.price * quantity) : item.price}</p>
               </div>
             ))
           )}
@@ -97,14 +104,26 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
                 <span>Total</span>
                 <span>{formatPrice(totalPrice)}</span>
             </div>
-            <button 
-              onClick={handleFinalizeOrder}
-              disabled={orderItems.length === 0} 
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-                <Icon name="whatsapp" className="w-5 h-5" />
-                <span>Finalizar via WhatsApp</span>
-            </button>
+            <div className="space-y-2">
+                <button 
+                onClick={handleFinalizeOrder}
+                disabled={orderItems.length === 0} 
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                    <Icon name="whatsapp" className="w-5 h-5" />
+                    <span>Finalizar via WhatsApp</span>
+                </button>
+                {orderItems.length > 0 && (
+                    <button
+                        onClick={onClearCart}
+                        className="w-full flex items-center justify-center text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 py-2 px-4 rounded-lg transition-colors"
+                        aria-label="Esvaziar carrinho"
+                    >
+                        <Icon name="trash" className="w-4 h-4 mr-2" />
+                        Esvaziar Carrinho
+                    </button>
+                )}
+            </div>
         </footer>
       </div>
     </div>

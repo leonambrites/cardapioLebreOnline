@@ -1,17 +1,19 @@
+
 import React from 'react';
 import Icon from './Icon';
-import { CONTACT_PHONE_NUMBER, CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
 
+import { CONTACT_PHONE_NUMBER, CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
 
 const ContactInfo: React.FC = () => {
   const infoItems = [
-    { icon: 'location', text: 'Entregas congeladas em Vargens, Barra e Recreio (Em até 48h)' },
+    { icon: 'location', text: 'Entregas em Vargens, Barra e Recreio' },
     { icon: 'phone', text: CONTACT_PHONE_NUMBER },
   ];
 
   const socialLinks = [
-    { icon: 'whatsapp', href: 'https://wa.me/5521982112061?text=Ol%C3%A1%21%20Gostaria%20de%20informa%C3%A7%C3%B5es', label: 'WhatsApp' },
+    { icon: 'whatsapp', href: `https://wa.me/${CONTACT_PHONE_NUMBER_WHATSAPP}/`, label: 'WhatsApp' },
     { icon: 'instagram', href: 'https://www.instagram.com/lebre.alimentos/', label: 'Instagram' },
+    { icon: 'blog', href: '#', label: 'Blog Lebre (em breve)' },
   ];
 
   return (
@@ -31,8 +33,9 @@ const ContactInfo: React.FC = () => {
               key={link.icon}
               href={link.href}
               aria-label={link.label}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={link.href === '#' ? '_self' : '_blank'}
+              rel={link.href === '#' ? '' : 'noopener noreferrer'}
+              onClick={link.href === '#' ? (e) => e.preventDefault() : undefined}
               className="p-3 bg-gray-700/60 rounded-full hover:bg-pink-500 hover:text-white transition-colors duration-300"
             >
               <Icon name={link.icon} className="w-6 h-6" />
