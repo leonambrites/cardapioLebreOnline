@@ -1,62 +1,60 @@
-
 import React, { useState, useMemo } from 'react';
 import Header from './components/Header';
 import MenuCategory from './components/MenuCategory';
 import OrderSummary from './components/OrderSummary';
 import FloatingCartButton from './components/FloatingCartButton';
-import ImageModal from './components/ImageModal';
+import ProductDetailModal from './components/ProductDetailModal';
 import ContactInfo from './components/ContactInfo';
 import { MENU_DATA } from './constants';
-import type { MenuCategoryType, MenuItemType, OrderItemType } from './types';
+import type { MenuCategoryType, MenuItemType, OrderItemType, SizeOption } from './types';
 
 const App: React.FC = () => {
   const [order, setOrder] = useState<OrderItemType[]>([]);
   const [isOrderSummaryOpen, setOrderSummaryOpen] = useState(false);
-  const [imageModal, setImageModal] = useState<{ isOpen: boolean; imageUrl: string }>({
-    isOpen: false,
-    imageUrl: '',
-  });
+  const [selectedItem, setSelectedItem] = useState<MenuItemType | null>(null);
 
-  const handleAddToOrder = (itemToAdd: MenuItemType, quantity: number) => {
+  const handleAddToOrder = (itemToAdd: MenuItemType, quantity: number, selectedSize?: SizeOption) => {
+    const orderItemId = selectedSize ? `${itemToAdd.id}-${selectedSize.size}` : `${itemToAdd.id}`;
+    
     setOrder(prevOrder => {
       const existingItemIndex = prevOrder.findIndex(
-        orderItem => orderItem.item.id === itemToAdd.id
+        orderItem => orderItem.id === orderItemId
       );
 
       if (existingItemIndex > -1) {
-        // Item exists, update quantity
+        // Item with same size exists, update quantity
         const updatedOrder = [...prevOrder];
-        // FIX: Corrected variable name from 'existingItem' to 'existingItemIndex' and removed incorrect '-1'.
+        // FIX: Corrected typo from `existingItem-1` to `existingItemIndex` to correctly update the item's quantity.
         updatedOrder[existingItemIndex].quantity += quantity;
         return updatedOrder;
       } else {
-        // Item doesn't exist, add it
-        return [...prevOrder, { item: itemToAdd, quantity }];
+        // Item doesn't exist or has a different size, add it
+        return [...prevOrder, { id: orderItemId, item: itemToAdd, quantity, selectedSize }];
       }
     });
   };
 
-  const handleUpdateQuantity = (itemId: number, newQuantity: number) => {
+  const handleUpdateQuantity = (orderItemId: string, newQuantity: number) => {
     setOrder(prevOrder => {
       if (newQuantity <= 0) {
         // Remove item if quantity is 0 or less
-        return prevOrder.filter(orderItem => orderItem.item.id !== itemId);
+        return prevOrder.filter(orderItem => orderItem.id !== orderItemId);
       }
       // Otherwise, update quantity
       return prevOrder.map(orderItem => 
-        orderItem.item.id === itemId 
+        orderItem.id === orderItemId 
           ? { ...orderItem, quantity: newQuantity } 
           : orderItem
       );
     });
   };
   
-  const handleImageClick = (imageUrl: string) => {
-    setImageModal({ isOpen: true, imageUrl });
+  const handleSelectItem = (item: MenuItemType) => {
+    setSelectedItem(item);
   };
 
-  const handleCloseImageModal = () => {
-    setImageModal({ isOpen: false, imageUrl: '' });
+  const handleCloseProductModal = () => {
+    setSelectedItem(null);
   };
 
   const handleClearCart = () => {
@@ -68,8 +66,8 @@ const App: React.FC = () => {
   }, [order]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900 text-white">
-      <div className="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-800 text-slate-100">
+      <div className="container mx-auto max-w-4xl p-2 sm:p-6 lg:p-8">
         <Header />
         <div className="mt-8">
           <ContactInfo />
@@ -81,12 +79,12 @@ const App: React.FC = () => {
                 key={category.id} 
                 category={category} 
                 onAddToOrder={handleAddToOrder}
-                onImageClick={handleImageClick}
+                onSelectItem={handleSelectItem}
               />
             ))}
           </div>
         </main>
-        <footer className="text-center text-gray-500 text-sm mt-16 pb-4">
+        <footer className="text-center text-slate-400 text-sm mt-16 pb-4">
           <p>LEBRE • Delícias saudáveis para todas as idades</p>
         </footer>
       </div>
@@ -102,12 +100,14 @@ const App: React.FC = () => {
         orderItems={order}
         onUpdateQuantity={handleUpdateQuantity}
         onClearCart={handleClearCart}
+        onAddToOrder={handleAddToOrder}
       />
 
-      <ImageModal
-        isOpen={imageModal.isOpen}
-        imageUrl={imageModal.imageUrl}
-        onClose={handleCloseImageModal}
+      <ProductDetailModal
+        isOpen={!!selectedItem}
+        item={selectedItem}
+        onClose={handleCloseProductModal}
+        onAddToOrder={handleAddToOrder}
       />
     </div>
   );

@@ -3,6 +3,9 @@ import type { MenuCategoryType } from './types';
 export const CONTACT_PHONE_NUMBER = '(21) 98211-2061';
 export const CONTACT_PHONE_NUMBER_WHATSAPP = '5521982112061'; // Formato internacional: Código do país + DDD + Número
 
+export const DELIVERY_FEE = 5;
+export const FREE_DELIVERY_THRESHOLD = 100;
+
 export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 1,
@@ -11,7 +14,7 @@ export const MENU_DATA: MenuCategoryType[] = [
       {
         id: 101,
         name: 'Bolinho de frango com queijo',
-        description: '4 unidades do delicioso bolinho com massa de batata doce, recheado com frango cremoso e queijo. Assado e saudável!',
+        description: '4 unidades do delicioso bolinho com massa de batata doce e frango, recheado com queijo.',
         price: 24,
         imageUrl: 'https://i.imgur.com/Mu3eoJm.png',
       },
@@ -25,7 +28,7 @@ export const MENU_DATA: MenuCategoryType[] = [
       {
         id: 104,
         name: 'Nuggets caseiros',
-        description: '7 unidades de nuggets de frango feitos em casa, crocantes por fora e macios por dentro. Assados na airfryer, sem industrializados.',
+        description: '7 unidades de nuggets de frango feitos em casa. Assados na airfryer, sem industrializados.',
         price: 24,
         imageUrl: 'https://i.imgur.com/HfyYCwn.png',
       },
@@ -44,23 +47,32 @@ export const MENU_DATA: MenuCategoryType[] = [
     items: [
       {
         id: 201,
-        name: 'Sopa Tem tudo [400ml]',
-        description: 'Frango, abóbora, grão de bico, macarrão de letrinhas, abobrinha, cenoura, vagem, batata doce e agrião.',
-        price: 29,
+        name: 'Sopa Tem tudo',
+        description: 'Sopa com Frango, abóbora, grão de bico, macarrão de letrinhas, abobrinha, cenoura, vagem, batata doce e agrião.',
+        sizes: [
+          { size: '220ml', price: 14 },
+          { size: '460ml', price: 25 },
+        ],
         imageUrl: 'https://i.imgur.com/9NxFRfY.png',
       },
       {
         id: 202,
-        name: 'Sopa de ervilha [400ml]',
-        description: 'Sopa cremosa de ervilha com carne, cenoura, batata inglesa e vagem. Um clássico que aquece o coração.',
-        price: 27,
+        name: 'Sopa de ervilha',
+        description: 'Sopa cremosa de ervilha com carne, cenoura, batata inglesa e vagem.',
+        sizes: [
+          { size: '220ml', price: 14 },
+          { size: '460ml', price: 25 },
+        ],
         imageUrl: 'https://i.imgur.com/mchEq5z.png',
       },
       {
         id: 203,
-        name: 'Sopa de baroa com frango [400ml]',
-        description: 'Sopa cremosa de batata baroa com frango desfiado, alho poró e brócolis. Sabor suave e nutritivo.',
-        price: 28,
+        name: 'Sopa de baroa com frango',
+        description: 'Sopa cremosa de batata baroa com frango desfiado, alho poró e brócolis.',
+        sizes: [
+          { size: '220ml', price: 14 },
+          { size: '460ml', price: 25 },
+        ],
         imageUrl: 'https://i.imgur.com/1QBTR8V.png',
       },
     ],
@@ -71,23 +83,23 @@ export const MENU_DATA: MenuCategoryType[] = [
     items: [
         {
             id: 301,
-            name: 'Cupcake de morango [4 un.]',
-            description: 'Bolinhos fofinhos de aveia e banana com pedacinhos de morango natural. Um docinho divertido e saudável.',
-            price: 24,
+            name: 'Cupcake de morango',
+            description: '4 unidades de bolinhos fofinhos de aveia e banana com pedacinhos de morango natural.',
+            price: 22,
             imageUrl: 'https://i.imgur.com/GaPvOiG.png',
         },
         {
             id: 302,
-            name: 'Cupcake de chocolate [4 un.]',
-            description: 'O clássico cacau em versão sem açúcar. Macios, saborosos e pensados para matar a vontade de doce sem culpa.',
-            price: 24,
+            name: 'Cupcake de chocolate',
+            description: '4 unidades do clássico cupcake de chocolate em versão sem açúcar.',
+            price: 18,
             imageUrl: 'https://i.imgur.com/MoyDbjW.png',
         },
         {
             id: 303,
-            name: 'Brigadeiro de colher [200g]',
+            name: 'Brigadeiro de colher',
             description: 'Cremoso, feito com cacau e adoçado com tâmaras. Pode ser usado como cobertura para o cupcake!',
-            price: 13,
+            price: 14,
             imageUrl: 'https://i.imgur.com/VJLH37K.png',
         },
     ],
@@ -99,21 +111,21 @@ export const MENU_DATA: MenuCategoryType[] = [
         {
             id: 401,
             name: 'Chocolate',
-            description: 'Sorvete cremoso de cacau, adoçado com banana. Refrescante, nutritivo e irresistível.',
+            description: 'Sorvete cremoso de cacau, adoçado com banana.',
             price: 8,
             imageUrl: 'https://i.imgur.com/AZoRF1F.jpeg',
         },
         {
             id: 402,
             name: 'Chocolate com Amendoim',
-            description: 'A união perfeita do cacau com o amendoim. Cremoso, divertido e cheio de energia boa para os pequenos.',
+            description: 'A união perfeita do cacau com o amendoim.',
             price: 9,
             imageUrl: 'https://i.imgur.com/AZoRF1F.jpeg',
         },
         {
             id: 403,
             name: 'Morango',
-            description: 'Sabor suave e natural do morango, adoçado com banana. Geladinho leve e saudável que refresca e conquista.',
+            description: 'Sabor suave e natural do morango, adoçado com banana.',
             price: 9,
             imageUrl: 'https://i.imgur.com/nXzXeTy.jpeg',
         },
@@ -121,7 +133,7 @@ export const MENU_DATA: MenuCategoryType[] = [
             id: 405,
             name: 'Açaí',
             description: 'Cremoso e cheio de energia: açaí batido com banana, naturalmente doce e refrescante.',
-            price: 8,
+            price: 9,
             imageUrl: 'https://i.imgur.com/y7ZRu3C.jpeg',
         },
     ]
@@ -130,7 +142,7 @@ export const MENU_DATA: MenuCategoryType[] = [
     id: 5,
     name: 'Festa',
     items: [
-        {
+                {
             id: 501,
             name: 'Bolo para festa',
             description: 'Bolo de chocolate fofinho e delicioso, perfeito para festas. Consulte opções de tamanho e cobertura.',
@@ -150,7 +162,7 @@ export const MENU_DATA: MenuCategoryType[] = [
             description: 'Kit de cupcakes para festa.',
             price: 'A combinar',
             imageUrl: 'https://i.imgur.com/PlYVwTN.png',
-        }
+        },
     ]
   }
 ];
