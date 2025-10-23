@@ -16,19 +16,69 @@ interface OrderSummaryProps {
 const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems, onUpdateQuantity, onClearCart, onAddToOrder }) => {
   const [orderSent, setOrderSent] = useState(false);
   const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-
+  
+  // Address state
+  const [cep, setCep] = useState('');
+  const [street, setStreet] = useState('');
+  const [number, setNumber] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [complement, setComplement] = useState('');
+  const [isFetchingAddress, setIsFetchingAddress] = useState(false);
+  const [addressError, setAddressError] = useState('');
 
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
         setOrderSent(false);
         setCustomerName('');
-        setCustomerAddress('');
+        // Reset address fields
+        setCep('');
+        setStreet('');
+        setNumber('');
+        setNeighborhood('');
+        setComplement('');
+        setAddressError('');
+        setIsFetchingAddress(false);
       }, 300);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
+  
+  // CEP Lookup Effect
+  useEffect(() => {
+    const fetchAddress = async (cepToFetch: string) => {
+      setIsFetchingAddress(true);
+      setAddressError('');
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepToFetch}/json/`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        if (data.erro) {
+          setAddressError('CEP não encontrado.');
+          setStreet('');
+          setNeighborhood('');
+        } else {
+          setStreet(data.logradouro || '');
+          setNeighborhood(data.bairro || '');
+        }
+      } catch (error) {
+        setAddressError('Erro ao buscar CEP.');
+        console.error("Error fetching CEP:", error);
+      } finally {
+        setIsFetchingAddress(false);
+      }
+    };
+
+    const cleanedCep = cep.replace(/\D/g, '');
+    if (cleanedCep.length === 8) {
+      fetchAddress(cleanedCep);
+    } else {
+        setStreet('');
+        setNeighborhood('');
+        setAddressError('');
+    }
+  }, [cep]);
+
 
   if (!isOpen) return null;
 
@@ -39,7 +89,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
 
   const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0 ? 0 : DELIVERY_FEE;
   const finalTotal = subtotal + deliveryFee;
-  const isFormValid = customerName.trim() !== '' && customerAddress.trim() !== '';
+  const isFormValid = customerName.trim() !== '' && cep.replace(/\D/g, '').length === 8 && street.trim() !== '' && number.trim() !== '' && neighborhood.trim() !== '' && !isFetchingAddress && !addressError;
 
   const progressPercentage = Math.min((subtotal / FREE_DELIVERY_THRESHOLD) * 100, 100);
   const amountLeftForFreeDelivery = FREE_DELIVERY_THRESHOLD - subtotal;
@@ -48,11 +98,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
     if (!isFormValid || orderItems.length === 0 || orderSent) return;
     
     const orderId = Date.now().toString().slice(-4);
+    const fullAddress = `${street}, Nº ${number}${complement ? `, ${complement}` : ''}, ${neighborhood} - CEP: ${cep}`;
 
     let message = `*Pedido Nº: #${orderId}*\n\n`;
-    message += '*Novo Pedido LEBRE* 🥗\n\n';
+    message += '*Novo Pedido LEBRE*\n\n';
     message += `*Cliente:* ${customerName}\n`;
-    message += `*Endereço:* ${customerAddress}\n\n`;
+    message += `*Endereço:* ${fullAddress}\n\n`;
     message += '*Itens do Pedido:*\n';
     
     orderItems.forEach(({ item, quantity, selectedSize }) => {
@@ -169,27 +220,55 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
                     )}
                   </div>
                   <h3 className="font-semibold text-lg text-slate-200">Seus Dados para Entrega</h3>
-                  <div>
-                    <label htmlFor="customerName" className="block text-xs font-medium text-slate-400 mb-1">Nome</label>
-                    <input 
-                      type="text" 
-                      id="customerName"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Seu nome completo"
-                      className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="customerAddress" className="block text-xs font-medium text-slate-400 mb-1">Endereço Completo</label>
-                    <input 
-                      type="text" 
-                      id="customerAddress"
-                      value={customerAddress}
-                      onChange={(e) => setCustomerAddress(e.target.value)}
-                      placeholder="Rua, Número, Bairro, Complemento"
-                      className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
+                  <div className="space-y-3">
+                    <div>
+                      <label htmlFor="customerName" className="block text-xs font-medium text-slate-400 mb-1">Nome</label>
+                      <input 
+                        type="text" 
+                        id="customerName"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Seu nome completo"
+                        className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                     <div>
+                      <label htmlFor="cep" className="block text-xs font-medium text-slate-400 mb-1">CEP</label>
+                       <div className="relative">
+                        <input 
+                          type="text" 
+                          id="cep"
+                          value={cep}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 8) setCep(val);
+                          }}
+                          placeholder="00000-000"
+                          maxLength={8}
+                          className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                         {isFetchingAddress && <Icon name="spinner" className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 animate-spin" />}
+                       </div>
+                       {addressError && <p className="text-xs text-red-400 mt-1">{addressError}</p>}
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="col-span-2">
+                            <label htmlFor="street" className="block text-xs font-medium text-slate-400 mb-1">Rua</label>
+                            <input type="text" id="street" value={street} readOnly placeholder="Sua rua" className="w-full bg-slate-600 border border-slate-500 rounded-md px-3 py-2 text-slate-300 placeholder-gray-500 cursor-not-allowed"/>
+                        </div>
+                        <div>
+                            <label htmlFor="number" className="block text-xs font-medium text-slate-400 mb-1">Número</label>
+                            <input type="text" id="number" value={number} onChange={e => setNumber(e.target.value)} placeholder="Nº" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                        </div>
+                    </div>
+                     <div>
+                        <label htmlFor="neighborhood" className="block text-xs font-medium text-slate-400 mb-1">Bairro</label>
+                        <input type="text" id="neighborhood" value={neighborhood} readOnly placeholder="Seu bairro" className="w-full bg-slate-600 border border-slate-500 rounded-md px-3 py-2 text-slate-300 placeholder-gray-500 cursor-not-allowed"/>
+                    </div>
+                     <div>
+                        <label htmlFor="complement" className="block text-xs font-medium text-slate-400 mb-1">Complemento <span className="text-slate-500">(Opcional)</span></label>
+                        <input type="text" id="complement" value={complement} onChange={e => setComplement(e.target.value)} placeholder="Apto, Bloco, Casa" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                    </div>
                   </div>
                 </div>
               )}
