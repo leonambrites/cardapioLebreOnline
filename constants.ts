@@ -18,6 +18,7 @@ export const MENU_DATA: MenuCategoryType[] = [
         description: '4 unidades do delicioso bolinho com massa de batata doce e frango, recheado com queijo.',
         price: 24,
         imageUrl: 'https://i.imgur.com/Mu3eoJm.png',
+        hasSaltOption: true,
       },
       {
         id: 103,
@@ -25,6 +26,7 @@ export const MENU_DATA: MenuCategoryType[] = [
         description: '4 unidades quibe de carne assado no forno, temperado suavemente com hortelã para agradar o paladar dos pequenos.',
         price: 24,
         imageUrl: 'https://i.imgur.com/h9pIMPY.png',
+        hasSaltOption: true,
       },
       {
         id: 104,
@@ -32,6 +34,7 @@ export const MENU_DATA: MenuCategoryType[] = [
         description: '7 unidades de nuggets de frango feitos em casa. Assados na airfryer, sem industrializados.',
         price: 24,
         imageUrl: 'https://i.imgur.com/HfyYCwn.png',
+        hasSaltOption: true,
       },
       {
         id: 105,
@@ -56,6 +59,7 @@ export const MENU_DATA: MenuCategoryType[] = [
           { size: '460ml', price: 25 },
         ],
         imageUrl: 'https://i.imgur.com/9NxFRfY.png',
+        hasSaltOption: true,
       },
       {
         id: 202,
@@ -66,6 +70,7 @@ export const MENU_DATA: MenuCategoryType[] = [
           { size: '460ml', price: 25 },
         ],
         imageUrl: 'https://i.imgur.com/mchEq5z.png',
+        hasSaltOption: true,
       },
       {
         id: 203,
@@ -76,6 +81,7 @@ export const MENU_DATA: MenuCategoryType[] = [
           { size: '460ml', price: 25 },
         ],
         imageUrl: 'https://i.imgur.com/1QBTR8V.png',
+        hasSaltOption: true,
       },
     ],
   },

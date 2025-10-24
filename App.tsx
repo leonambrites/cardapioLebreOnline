@@ -7,7 +7,7 @@ import ProductDetailModal from './components/ProductDetailModal';
 import ContactInfo from './components/ContactInfo';
 import MenuSkeleton from './components/MenuSkeleton';
 import { MENU_DATA } from './constants';
-import type { MenuCategoryType, MenuItemType, OrderItemType, SizeOption } from './types';
+import type { MenuCategoryType, MenuItemType, OrderItemType, SizeOption, SaltOption } from './types';
 
 const App: React.FC = () => {
   const [order, setOrder] = useState<OrderItemType[]>([]);
@@ -24,8 +24,9 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAddToOrder = useCallback((itemToAdd: MenuItemType, quantity: number, selectedSize?: SizeOption) => {
-    const orderItemId = selectedSize ? `${itemToAdd.id}-${selectedSize.size}` : `${itemToAdd.id}`;
+  const handleAddToOrder = useCallback((itemToAdd: MenuItemType, quantity: number, selectedSize?: SizeOption, saltOption?: SaltOption) => {
+    const effectiveSaltOption = itemToAdd.hasSaltOption ? (saltOption || 'Com Sal') : undefined;
+    const orderItemId = `${itemToAdd.id}-${selectedSize?.size || 'default'}-${effectiveSaltOption || 'default'}`;
     
     setOrder(prevOrder => {
       const existingItemIndex = prevOrder.findIndex(
@@ -37,7 +38,7 @@ const App: React.FC = () => {
         updatedOrder[existingItemIndex].quantity += quantity;
         return updatedOrder;
       } else {
-        return [...prevOrder, { id: orderItemId, item: itemToAdd, quantity, selectedSize }];
+        return [...prevOrder, { id: orderItemId, item: itemToAdd, quantity, selectedSize, saltOption: effectiveSaltOption }];
       }
     });
     

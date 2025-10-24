@@ -1,10 +1,10 @@
 import React from 'react';
 import MenuItem from './MenuItem';
-import type { MenuCategoryType, MenuItemType, SizeOption } from '../types';
+import type { MenuCategoryType, MenuItemType, SizeOption, SaltOption } from '../types';
 
 interface MenuCategoryProps {
   category: MenuCategoryType;
-  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption) => void;
+  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption, saltOption?: SaltOption) => void;
   onSelectItem: (item: MenuItemType) => void;
 }
 

@@ -3,6 +3,8 @@ export interface SizeOption {
   price: number;
 }
 
+export type SaltOption = 'Com Sal' | 'Sem Sal';
+
 export interface MenuItemType {
   id: number;
   name: string;
@@ -10,6 +12,7 @@ export interface MenuItemType {
   price?: number | string;
   sizes?: SizeOption[];
   imageUrl: string;
+  hasSaltOption?: boolean;
 }
 
 export interface MenuCategoryType {
@@ -20,8 +23,9 @@ export interface MenuCategoryType {
 }
 
 export interface OrderItemType {
-  id: string; // Unique ID like "itemId-size"
+  id: string; // Unique ID like "itemId-size-salt"
   item: MenuItemType;
   quantity: number;
   selectedSize?: SizeOption;
+  saltOption?: SaltOption;
 }

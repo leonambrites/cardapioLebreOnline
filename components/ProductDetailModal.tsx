@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { MenuItemType, SizeOption } from '../types';
+import type { MenuItemType, SizeOption, SaltOption } from '../types';
 import Icon from './Icon';
 import { CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
 import { formatPrice } from '../utils';
@@ -8,13 +8,14 @@ interface ProductDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: MenuItemType | null;
-  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption) => void;
+  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption, saltOption?: SaltOption) => void;
 }
 
 const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, onClose, item, onAddToOrder }) => {
   const [quantity, setQuantity] = useState(1);
   const [wasAdded, setWasAdded] = useState(false);
   const [selectedSize, setSelectedSize] = useState<SizeOption | undefined>(undefined);
+  const [selectedSaltOption, setSelectedSaltOption] = useState<SaltOption>('Com Sal');
 
   useEffect(() => {
     // Reset state whenever the modal is opened with an item.
@@ -22,6 +23,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, onClose
       setQuantity(1);
       setSelectedSize(item.sizes ? item.sizes[0] : undefined);
       setWasAdded(false);
+      setSelectedSaltOption('Com Sal');
     }
   }, [isOpen, item]);
 
@@ -39,7 +41,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, onClose
 
   const handleAddToCartClick = () => {
     if (!item) return;
-    onAddToOrder(item, quantity, selectedSize);
+    onAddToOrder(item, quantity, selectedSize, selectedSaltOption);
     setWasAdded(true);
     setTimeout(() => {
       onClose();
@@ -89,21 +91,39 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, onClose
                 <p className="text-slate-400">{item.description}</p>
                 {item.sizes && (
                     <div className="flex items-center space-x-2 pt-2">
-                    <span className="text-sm font-semibold text-slate-400">Tamanho:</span>
-                    {item.sizes.map(size => (
-                        <button
-                        key={size.size}
-                        onClick={() => setSelectedSize(size)}
+                      <span className="text-sm font-semibold text-slate-400">Tamanho:</span>
+                      {item.sizes.map(size => (
+                          <button
+                          key={size.size}
+                          onClick={() => setSelectedSize(size)}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                              selectedSize?.size === size.size
+                              ? 'bg-orange-500 text-white font-semibold'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
+                          >
+                          {size.size}
+                          </button>
+                      ))}
+                    </div>
+                )}
+                {item.hasSaltOption && (
+                  <div className="flex items-center space-x-2 pt-2">
+                    <span className="text-sm font-semibold text-slate-400">Opção:</span>
+                    {(['Com Sal', 'Sem Sal'] as SaltOption[]).map(option => (
+                      <button
+                        key={option}
+                        onClick={() => setSelectedSaltOption(option)}
                         className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                            selectedSize?.size === size.size
+                          selectedSaltOption === option
                             ? 'bg-orange-500 text-white font-semibold'
                             : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                         }`}
-                        >
-                        {size.size}
-                        </button>
+                      >
+                        {option}
+                      </button>
                     ))}
-                    </div>
+                  </div>
                 )}
             </main>
             <footer className="p-6 mt-auto border-t border-slate-700 space-y-4 flex-shrink-0">

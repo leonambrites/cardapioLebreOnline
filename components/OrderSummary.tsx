@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { MenuItemType, OrderItemType, SizeOption } from '../types';
+import type { MenuItemType, OrderItemType, SizeOption, SaltOption } from '../types';
 import Icon from './Icon';
 import { CONTACT_PHONE_NUMBER_WHATSAPP, DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } from '../constants';
 import { formatPrice } from '../utils';
@@ -11,7 +11,7 @@ interface OrderSummaryProps {
   orderItems: OrderItemType[];
   onUpdateQuantity: (orderItemId: string, newQuantity: number) => void;
   onClearCart: () => void;
-  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption) => void;
+  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption, saltOption?: SaltOption) => void;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems, onUpdateQuantity, onClearCart, onAddToOrder }) => {
@@ -59,8 +59,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
     message += `*Endereço:* ${fullAddress}\n\n`;
     message += '*Itens do Pedido:*\n';
     
-    orderItems.forEach(({ item, quantity, selectedSize }) => {
-      const itemName = selectedSize ? `${item.name} (${selectedSize.size})` : item.name;
+    orderItems.forEach(({ item, quantity, selectedSize, saltOption }) => {
+      let itemName = item.name;
+      if (selectedSize) itemName += ` (${selectedSize.size})`;
+      if (saltOption) itemName += ` (${saltOption})`;
+      
       const itemPrice = selectedSize?.price ?? (typeof item.price === 'number' ? item.price : 0);
       message += `- ${quantity}x ${itemName} (${formatPrice(itemPrice * quantity)})\n`;
     });
@@ -120,9 +123,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
             {/* Coluna da Esquerda: Itens do Pedido */}
             <section className="space-y-4">
               <h3 className="font-semibold text-lg text-slate-200 border-b border-slate-700 pb-2 mb-4">Seus Itens</h3>
-              {orderItems.map(({ id, item, quantity, selectedSize }) => {
+              {orderItems.map(({ id, item, quantity, selectedSize, saltOption }) => {
                 const itemPrice = selectedSize?.price ?? (typeof item.price === 'number' ? item.price : 0);
-                const name = selectedSize ? `${item.name} (${selectedSize.size})` : item.name;
+                let name = item.name;
+                if (selectedSize) name += ` (${selectedSize.size})`;
+                if (saltOption) name += ` (${saltOption})`;
 
                 return (
                   <div key={id} className="flex items-start gap-4">

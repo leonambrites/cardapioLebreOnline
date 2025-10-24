@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
-import type { MenuItemType, SizeOption } from '../types';
+import type { MenuItemType, SizeOption, SaltOption } from '../types';
 import Icon from './Icon';
 import { CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
 import { formatPrice } from '../utils';
 
 interface MenuItemProps {
   item: MenuItemType;
-  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption) => void;
+  onAddToOrder: (item: MenuItemType, quantity: number, selectedSize?: SizeOption, saltOption?: SaltOption) => void;
   onSelectItem: (item: MenuItemType) => void;
 }
 
