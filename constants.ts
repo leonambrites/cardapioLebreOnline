@@ -10,6 +10,7 @@ export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 1,
     name: 'Salgados',
+    subtitle: 'Praticidade e sabor em cada mordida',
     items: [
       {
         id: 101,
@@ -44,6 +45,7 @@ export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 2,
     name: 'Sopas',
+    subtitle: 'Nutrição que aquece o coração',
     items: [
       {
         id: 201,
@@ -80,6 +82,7 @@ export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 3,
     name: 'Doces',
+    subtitle: 'Pequenas delícias, grandes sorrisos',
     items: [
         {
             id: 301,
@@ -107,6 +110,7 @@ export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 4,
     name: 'Sorvetes (100ml)',
+    subtitle: 'Naturais, cremosos e na medida certa',
     items: [
         {
             id: 401,
@@ -141,6 +145,7 @@ export const MENU_DATA: MenuCategoryType[] = [
   {
     id: 5,
     name: 'Festa',
+    subtitle: 'Leve o sabor do Lebre para suas celebrações',
     items: [
                 {
             id: 501,

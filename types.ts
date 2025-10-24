@@ -15,6 +15,7 @@ export interface MenuItemType {
 export interface MenuCategoryType {
   id: number;
   name: string;
+  subtitle?: string;
   items: MenuItemType[];
 }
 

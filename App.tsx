@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import MenuCategory from './components/MenuCategory';
 import OrderSummary from './components/OrderSummary';
 import FloatingCartButton from './components/FloatingCartButton';
 import ProductDetailModal from './components/ProductDetailModal';
 import ContactInfo from './components/ContactInfo';
+import MenuSkeleton from './components/MenuSkeleton';
 import { MENU_DATA } from './constants';
 import type { MenuCategoryType, MenuItemType, OrderItemType, SizeOption } from './types';
 
@@ -12,8 +13,18 @@ const App: React.FC = () => {
   const [order, setOrder] = useState<OrderItemType[]>([]);
   const [isOrderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItemType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCartAnimating, setIsCartAnimating] = useState(false);
 
-  const handleAddToOrder = (itemToAdd: MenuItemType, quantity: number, selectedSize?: SizeOption) => {
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleAddToOrder = useCallback((itemToAdd: MenuItemType, quantity: number, selectedSize?: SizeOption) => {
     const orderItemId = selectedSize ? `${itemToAdd.id}-${selectedSize.size}` : `${itemToAdd.id}`;
     
     setOrder(prevOrder => {
@@ -22,44 +33,42 @@ const App: React.FC = () => {
       );
 
       if (existingItemIndex > -1) {
-        // Item with same size exists, update quantity
         const updatedOrder = [...prevOrder];
-        // FIX: Corrected typo from `existingItem-1` to `existingItemIndex` to correctly update the item's quantity.
         updatedOrder[existingItemIndex].quantity += quantity;
         return updatedOrder;
       } else {
-        // Item doesn't exist or has a different size, add it
         return [...prevOrder, { id: orderItemId, item: itemToAdd, quantity, selectedSize }];
       }
     });
-  };
+    
+    setIsCartAnimating(true);
+    setTimeout(() => setIsCartAnimating(false), 820); // Duration of the shake animation
+  }, []);
 
-  const handleUpdateQuantity = (orderItemId: string, newQuantity: number) => {
+  const handleUpdateQuantity = useCallback((orderItemId: string, newQuantity: number) => {
     setOrder(prevOrder => {
       if (newQuantity <= 0) {
-        // Remove item if quantity is 0 or less
         return prevOrder.filter(orderItem => orderItem.id !== orderItemId);
       }
-      // Otherwise, update quantity
       return prevOrder.map(orderItem => 
         orderItem.id === orderItemId 
           ? { ...orderItem, quantity: newQuantity } 
           : orderItem
       );
     });
-  };
+  }, []);
   
-  const handleSelectItem = (item: MenuItemType) => {
+  const handleSelectItem = useCallback((item: MenuItemType) => {
     setSelectedItem(item);
-  };
+  }, []);
 
-  const handleCloseProductModal = () => {
+  const handleCloseProductModal = useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
-  const handleClearCart = () => {
+  const handleClearCart = useCallback(() => {
     setOrder([]);
-  };
+  }, []);
 
   const totalItemsInCart = useMemo(() => {
     return order.reduce((total, currentItem) => total + currentItem.quantity, 0);
@@ -74,14 +83,18 @@ const App: React.FC = () => {
         </div>
         <main className="mt-8">
           <div className="mt-12 space-y-12">
-            {MENU_DATA.map((category: MenuCategoryType) => (
-              <MenuCategory 
-                key={category.id} 
-                category={category} 
-                onAddToOrder={handleAddToOrder}
-                onSelectItem={handleSelectItem}
-              />
-            ))}
+            {isLoading ? (
+              <MenuSkeleton />
+            ) : (
+              MENU_DATA.map((category: MenuCategoryType) => (
+                <MenuCategory 
+                  key={category.id} 
+                  category={category} 
+                  onAddToOrder={handleAddToOrder}
+                  onSelectItem={handleSelectItem}
+                />
+              ))
+            )}
           </div>
         </main>
         <footer className="text-center text-slate-400 text-sm mt-16 pb-4">
@@ -91,7 +104,8 @@ const App: React.FC = () => {
 
       <FloatingCartButton 
         itemCount={totalItemsInCart} 
-        onClick={() => setOrderSummaryOpen(true)} 
+        onClick={() => setOrderSummaryOpen(true)}
+        isAnimating={isCartAnimating}
       />
 
       <OrderSummary 

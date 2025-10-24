@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import type { MenuItemType, SizeOption } from '../types';
 import Icon from './Icon';
 import { CONTACT_PHONE_NUMBER_WHATSAPP } from '../constants';
@@ -83,6 +83,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToOrder, onSelectItem })
         <img 
           src={item.imageUrl} 
           alt={item.name}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
       </div>
@@ -177,4 +178,4 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToOrder, onSelectItem })
   );
 };
 
-export default MenuItem;
+export default memo(MenuItem);

@@ -3,6 +3,7 @@ import type { MenuItemType, OrderItemType, SizeOption } from '../types';
 import Icon from './Icon';
 import { CONTACT_PHONE_NUMBER_WHATSAPP, DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } from '../constants';
 import { formatPrice } from '../utils';
+import { useCep } from '../hooks/useCep';
 
 interface OrderSummaryProps {
   isOpen: boolean;
@@ -17,69 +18,21 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
   const [orderSent, setOrderSent] = useState(false);
   const [customerName, setCustomerName] = useState('');
   
-  // Address state
-  const [cep, setCep] = useState('');
-  const [street, setStreet] = useState('');
-  const [number, setNumber] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [complement, setComplement] = useState('');
-  const [isFetchingAddress, setIsFetchingAddress] = useState(false);
-  const [addressError, setAddressError] = useState('');
+  const {
+    cep, setCep, street, setStreet, number, setNumber, neighborhood, setNeighborhood, complement, setComplement, isFetchingAddress, addressError, resetAddress
+  } = useCep();
 
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
         setOrderSent(false);
         setCustomerName('');
-        // Reset address fields
-        setCep('');
-        setStreet('');
-        setNumber('');
-        setNeighborhood('');
-        setComplement('');
-        setAddressError('');
-        setIsFetchingAddress(false);
+        resetAddress();
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, resetAddress]);
   
-  // CEP Lookup Effect
-  useEffect(() => {
-    const fetchAddress = async (cepToFetch: string) => {
-      setIsFetchingAddress(true);
-      setAddressError('');
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cepToFetch}/json/`);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        if (data.erro) {
-          setAddressError('CEP não encontrado.');
-          setStreet('');
-          setNeighborhood('');
-        } else {
-          setStreet(data.logradouro || '');
-          setNeighborhood(data.bairro || '');
-        }
-      } catch (error) {
-        setAddressError('Erro ao buscar CEP.');
-        console.error("Error fetching CEP:", error);
-      } finally {
-        setIsFetchingAddress(false);
-      }
-    };
-
-    const cleanedCep = cep.replace(/\D/g, '');
-    if (cleanedCep.length === 8) {
-      fetchAddress(cleanedCep);
-    } else {
-        setStreet('');
-        setNeighborhood('');
-        setAddressError('');
-    }
-  }, [cep]);
-
-
   if (!isOpen) return null;
 
   const subtotal = orderItems.reduce((total, orderItem) => {
@@ -137,7 +90,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
       role="dialog"
     >
       <div 
-        className="bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-slate-700 transform transition-transform duration-300 scale-95"
+        className="bg-slate-800 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-slate-700 transform transition-transform duration-300 scale-95"
         style={{ animation: 'scale-up 0.3s forwards' }}
         onClick={e => e.stopPropagation()}
       >
@@ -154,126 +107,120 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
           </button>
         </header>
 
-        <main className="p-6 overflow-y-auto space-y-4">
-          {orderItems.length === 0 ? (
-            <p className="text-slate-400 text-center py-8">Seu carrinho está vazio.</p>
-          ) : (
-            <>
+        {orderItems.length === 0 && !orderSent ? (
+          <main className="flex-1 flex items-center justify-center p-6">
+            <div className="text-center py-16">
+              <Icon name="cart" className="w-16 h-16 mx-auto text-slate-600" />
+              <h3 className="mt-4 text-xl font-semibold text-slate-300">Seu carrinho está vazio</h3>
+              <p className="mt-2 text-slate-500">Adicione itens do cardápio para começar.</p>
+            </div>
+          </main>
+        ) : (
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 lg:gap-x-12 p-6 overflow-y-auto">
+            {/* Coluna da Esquerda: Itens do Pedido */}
+            <section className="space-y-4">
+              <h3 className="font-semibold text-lg text-slate-200 border-b border-slate-700 pb-2 mb-4">Seus Itens</h3>
               {orderItems.map(({ id, item, quantity, selectedSize }) => {
                 const itemPrice = selectedSize?.price ?? (typeof item.price === 'number' ? item.price : 0);
                 const name = selectedSize ? `${item.name} (${selectedSize.size})` : item.name;
 
                 return (
-                <div key={id} className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-slate-200 break-words pr-2">{name}</h3>
-                      <p className="font-bold text-slate-300 text-right flex-shrink-0">{formatPrice(itemPrice * quantity)}</p>
+                  <div key={id} className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover" 
+                      />
                     </div>
-                     <div className="flex items-center space-x-2 mt-2">
-                        <button onClick={() => onUpdateQuantity(id, quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-slate-700 text-slate-300 hover:bg-orange-500 hover:text-white transition-colors flex-shrink-0">-</button>
-                        <span className="w-8 text-center font-bold text-slate-100">{quantity}</span>
-                        <button onClick={() => onUpdateQuantity(id, quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-slate-700 text-slate-300 hover:bg-orange-500 hover:text-white transition-colors flex-shrink-0">+</button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-semibold text-slate-200 break-words pr-2">{name}</h3>
+                        <p className="font-bold text-slate-300 text-right flex-shrink-0">{formatPrice(itemPrice * quantity)}</p>
                       </div>
+                      <div className="flex items-center space-x-2 mt-2">
+                          <button onClick={() => onUpdateQuantity(id, quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-slate-700 text-slate-300 hover:bg-orange-500 hover:text-white transition-colors flex-shrink-0">-</button>
+                          <span className="w-8 text-center font-bold text-slate-100">{quantity}</span>
+                          <button onClick={() => onUpdateQuantity(id, quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="w-7 h-7 rounded-md bg-slate-700 text-slate-300 hover:bg-orange-500 hover:text-white transition-colors flex-shrink-0">+</button>
+                      </div>
+                    </div>
                   </div>
+                )
+              })}
+            </section>
+            
+            {/* Coluna da Direita: Dados de Entrega */}
+            <section className="space-y-4 mt-8 lg:mt-0 lg:border-l lg:border-slate-700 lg:pl-8">
+              <div className="space-y-2 mb-4">
+                {subtotal >= FREE_DELIVERY_THRESHOLD ? (
+                  <p className="text-center text-sm font-bold text-green-400">Parabéns! Você ganhou entrega grátis!</p>
+                ) : (
+                  <>
+                    <p className="text-center text-sm text-slate-400">
+                        Faltam <strong>{formatPrice(amountLeftForFreeDelivery)}</strong> para ter <strong>entrega grátis</strong>!
+                    </p>
+                    <div className="w-full bg-slate-700 rounded-full h-2.5">
+                        <div 
+                            className="bg-green-500 h-2.5 rounded-full transition-all duration-500" 
+                            style={{ width: `${progressPercentage}%` }}>
+                        </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <h3 className="font-semibold text-lg text-slate-200">Seus Dados para Entrega</h3>
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="customerName" className="block text-xs font-medium text-slate-400 mb-1">Nome</label>
+                  <input type="text" id="customerName" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Seu nome completo" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
                 </div>
-              )})}
-            </>
-          )}
-        </main>
+                <div>
+                  <label htmlFor="cep" className="block text-xs font-medium text-slate-400 mb-1">CEP</label>
+                  <div className="relative">
+                    <input type="text" id="cep" value={cep} onChange={(e) => { const val = e.target.value.replace(/\D/g, ''); if (val.length <= 8) setCep(val); }} placeholder="00000-000" maxLength={8} className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                    {isFetchingAddress && <Icon name="spinner" className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 animate-spin" />}
+                  </div>
+                  {addressError && <p className="text-xs text-red-400 mt-1">{addressError}</p>}
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-2">
+                        <label htmlFor="street" className="block text-xs font-medium text-slate-400 mb-1">Rua</label>
+                        <input type="text" id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Sua rua" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                    </div>
+                    <div>
+                        <label htmlFor="number" className="block text-xs font-medium text-slate-400 mb-1">Número</label>
+                        <input type="text" id="number" value={number} onChange={e => setNumber(e.target.value)} placeholder="Nº" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                    </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-2">
+                        <label htmlFor="neighborhood" className="block text-xs font-medium text-slate-400 mb-1">Bairro</label>
+                        <input type="text" id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Seu bairro" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                    </div>
+                    <div>
+                        <label htmlFor="complement" className="block text-xs font-medium text-slate-400 mb-1">Complemento</label>
+                        <input type="text" id="complement" value={complement} onChange={e => setComplement(e.target.value)} placeholder="Opcional" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                    </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
 
         <footer className="p-6 mt-auto border-t border-slate-700 space-y-4 flex-shrink-0">
           {orderSent ? (
             <div className="text-center py-4 transition-all duration-300 animate-pop-in">
-                <div className="flex justify-center items-center mb-3">
-                    <Icon name="check" className="w-10 h-10 text-green-400" />
-                </div>
-                <p className="text-lg font-bold text-green-400">Pedido enviado com sucesso!</p>
-                <p className="text-slate-400">Continue no WhatsApp para finalizar.</p>
+              <div className="flex justify-center items-center mb-3">
+                  <Icon name="check" className="w-10 h-10 text-green-400" />
+              </div>
+              <p className="text-lg font-bold text-green-400">Pedido enviado com sucesso!</p>
+              <p className="text-slate-400">Continue no WhatsApp para finalizar.</p>
             </div>
           ) : (
             <>
               {orderItems.length > 0 && (
-                <div className="space-y-3 pb-4">
-                  <div className="space-y-2 mb-4">
-                    {subtotal >= FREE_DELIVERY_THRESHOLD ? (
-                      <p className="text-center text-sm font-bold text-green-400">Parabéns! Você ganhou entrega grátis!</p>
-                    ) : (
-                      <>
-                        <p className="text-center text-sm text-slate-400">
-                            Faltam <strong>{formatPrice(amountLeftForFreeDelivery)}</strong> para ter <strong>entrega grátis</strong>!
-                        </p>
-                        <div className="w-full bg-slate-700 rounded-full h-2.5">
-                            <div 
-                                className="bg-green-500 h-2.5 rounded-full transition-all duration-500" 
-                                style={{ width: `${progressPercentage}%` }}>
-                            </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-lg text-slate-200">Seus Dados para Entrega</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label htmlFor="customerName" className="block text-xs font-medium text-slate-400 mb-1">Nome</label>
-                      <input 
-                        type="text" 
-                        id="customerName"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder="Seu nome completo"
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                     <div>
-                      <label htmlFor="cep" className="block text-xs font-medium text-slate-400 mb-1">CEP</label>
-                       <div className="relative">
-                        <input 
-                          type="text" 
-                          id="cep"
-                          value={cep}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
-                            if (val.length <= 8) setCep(val);
-                          }}
-                          placeholder="00000-000"
-                          maxLength={8}
-                          className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
-                         {isFetchingAddress && <Icon name="spinner" className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 animate-spin" />}
-                       </div>
-                       {addressError && <p className="text-xs text-red-400 mt-1">{addressError}</p>}
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className="col-span-2">
-                            <label htmlFor="street" className="block text-xs font-medium text-slate-400 mb-1">Rua</label>
-                            <input type="text" id="street" value={street} readOnly placeholder="Sua rua" className="w-full bg-slate-600 border border-slate-500 rounded-md px-3 py-2 text-slate-300 placeholder-gray-500 cursor-not-allowed"/>
-                        </div>
-                        <div>
-                            <label htmlFor="number" className="block text-xs font-medium text-slate-400 mb-1">Número</label>
-                            <input type="text" id="number" value={number} onChange={e => setNumber(e.target.value)} placeholder="Nº" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
-                        </div>
-                    </div>
-                     <div>
-                        <label htmlFor="neighborhood" className="block text-xs font-medium text-slate-400 mb-1">Bairro</label>
-                        <input type="text" id="neighborhood" value={neighborhood} readOnly placeholder="Seu bairro" className="w-full bg-slate-600 border border-slate-500 rounded-md px-3 py-2 text-slate-300 placeholder-gray-500 cursor-not-allowed"/>
-                    </div>
-                     <div>
-                        <label htmlFor="complement" className="block text-xs font-medium text-slate-400 mb-1">Complemento <span className="text-slate-500">(Opcional)</span></label>
-                        <input type="text" id="complement" value={complement} onChange={e => setComplement(e.target.value)} placeholder="Apto, Bloco, Casa" className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"/>
-                    </div>
-                  </div>
-                </div>
-              )}
-               {orderItems.length > 0 && (
-                <div className="space-y-2 pt-4 border-t border-slate-700">
+                <div className="space-y-2 pb-4">
                   <div className="flex justify-between text-md text-slate-300">
                     <span>Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
@@ -287,8 +234,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose, orderItems
                       <span className="text-orange-500">{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
-               )}
-              <div className="space-y-2 pt-2">
+              )}
+              <div className="space-y-2">
                   <button 
                   onClick={handleFinalizeOrder}
                   disabled={orderItems.length === 0 || !isFormValid} 
